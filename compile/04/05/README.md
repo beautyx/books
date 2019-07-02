@@ -216,3 +216,17 @@ The **LLD** project is a new linker. That is a drop-in replacement for system li
 
 
 
+## 6. 总结 LLVM 处理源文件的过程
+
+预处理 -> 词法分析 -> Token -> 语法分析 -> AST -> 代码生成 -> LLVM IR -> 优化 -> 生成汇编代码 -> Link -> 目标文件
+
+
+
+## 7. 围绕 LLVM 可以扩展的方向
+
+| LLVM 扩展的对象 | 应用                                                    |
+| --------------- | ------------------------------------------------------- |
+| 语法树 (AST)    | 实现不同语言的代码转换 (objc 转 Swift、JS or 其它语言） |
+| Clang Plugin    | 针对 **clang** : 命名规范、代码规范                     |
+| LLVM Pass       | 针对 **IR** : 代码优化、代码二次处理（混淆）            |
+

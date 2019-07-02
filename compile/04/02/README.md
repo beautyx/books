@@ -4,13 +4,7 @@
 
 ## 1. 实现一个简单的 clang plugin
 
-### 1. clang plugin 作用
-
-- 针对 **语法树(AST)** 有完全的控制权
-- 可作为 **插件** 注入到 **编译流程** 中, 可以影响 build 过程
-- 针对 **语法树(AST)** 定义一些: 编码规范检查, 代码风格检查，命名检查 ...
-
-### 2. 主要涉及的 llvm::clang AST 类
+### 1. 主要涉及的 llvm::clang AST 类
 
 | AST 类                     | 作用                                                         |
 | -------------------------- | ------------------------------------------------------------ |
@@ -19,7 +13,7 @@
 | clang::RecursiveASTVisitor | 前序或后续地深度优先 **搜索 整个 AST**, 并访问 **每一个节点** 的基类 |
 | clang::MatchFinder         | 是一个 AST 节点的查找 **过滤匹配器**, 可以使用 addMatcher 函数 去匹配自己关注的 AST 节点 |
 
-### 3. cd $LLVM_SOURCE_ROOT/tools/clang/tools
+### 2. cd $LLVM_SOURCE_ROOT/tools/clang/tools
 
 ```
  ~/llvm/tools/clang/tools   release_70  ll
@@ -51,7 +45,7 @@ drwxr-xr-x   5 xiongzenghui  staff   160B  6 27 00:51 scan-view
 - 这下面都是一个个的 **目录**
 - 每一个 **目录** 都是一个 **clang plugin** 的 **源码目录**
 
-### 4. 创建 myplugin 开发目录
+### 3. 创建 myplugin 开发目录
 
 ```
  ~/llvm/tools/clang/tools/myplugin   release_70 ●  tree
@@ -60,7 +54,7 @@ drwxr-xr-x   5 xiongzenghui  staff   160B  6 27 00:51 scan-view
 └── MyPlugin.cpp
 ```
 
-### 5. myplugin/CMakeLists.txt
+### 4. myplugin/CMakeLists.txt
 
 ```cmake
 add_llvm_loadable_module(MyPlugin
@@ -79,7 +73,7 @@ if(LLVM_ENABLE_PLUGINS AND (WIN32 OR CYGWIN))
 endif()
 ```
 
-### 6. myplugin/MyPlugin.cpp
+### 5. myplugin/MyPlugin.cpp
 
 ```c++
 #include "clang/AST/AST.h"
@@ -145,7 +139,7 @@ static clang::FrontendPluginRegistry::Add<MyPlugin::MyASTAction> X("MyPlugin", "
 
 先不管代码实现，先跑起来再说.
 
-### 7. 修改 $LLVM_SOURCE_ROOT/tools/clang/tools/CMakeLists.txt 注册 plugin 源码目录的路径
+### 6. 修改 $LLVM_SOURCE_ROOT/tools/clang/tools/CMakeLists.txt 注册 plugin 源码目录的路径
 
 ```makefile
 ................
@@ -153,7 +147,7 @@ static clang::FrontendPluginRegistry::Add<MyPlugin::MyASTAction> X("MyPlugin", "
 add_clang_subdirectory(myplugin) # 末尾注册自己的【clang plugin 源码】目录名
 ```
 
-### 8. 重新生成 LLVM.xcodeproj
+### 7. 重新生成 LLVM.xcodeproj 工程配置文件
 
 #### 1. cmake generate xcodeproj
 
@@ -228,11 +222,11 @@ cmake ../llvm -G Xcode -DCMAKE_BUILD_TYPE=Debug
 
 ok.
 
-### 9. 重新构建 clang
+### 8. 重新构建 clang
 
 ![](03.png)
 
-### 10. 构建 自己的 clang plugin
+### 9. 构建 自己的 clang plugin
 
 ![](10.png)
 
@@ -276,10 +270,11 @@ add_llvm_loadable_module( LLVMObfuscation
 
 依次选择 scheme 进行构建
 
-### 11. libclang.dylib
+### 10. libclang.dylib
 
 ![](11.png)
 
+接下来就是如何执行我们自己编写的 clang plugin
 
 
 

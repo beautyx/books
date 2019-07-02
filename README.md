@@ -51,9 +51,9 @@
 
 
 
-## 02. Compile
+## 02. compiler
 
-### 01. 程序员的自我修养—链接、装载与库
+### 01. 程序员的自我修养
 
 - [01 - 温故而知新](./compile/01/01/README.md)
 
@@ -61,11 +61,11 @@
 
 - [03 - 目标文件](./compile/01/03/README.md)
 
-- [04 - ==静态==链接](./compile/01/04/README.md)
+- [04 - ==静态== 链接](./compile/01/04/README.md)
 
-- [05 - 可执行文件的==装载==与进程](./compile/01/05/README.md)
+- [05 - 可执行文件的 ==装载== 与 ==进程==](./compile/01/05/README.md)
 
-- [06 - ==动态==链接](./compile/01/06/README.md)
+- [06 - ==动态== 链接](./compile/01/06/README.md)
 
 - [07 - Linux ==共享库==](./compile/01/07/README.md)
 
@@ -91,85 +91,97 @@
 
 - [05 - 重用(库)](./compile/02/05/README.md)
 
-### 03. 使用linux汇编语言
+### 03. 使用 linux 汇编语言
 
 
 
-### 04. LLVM Cookbook
+### 04. LLVM ==Cookbook==
 
-- [01 - LLVM设计与使用](./compile/03/01/README.md)
+- [01 - LLVM 设计 与 使用](./compile/03/01/README.md)
 
-- [02 - ==实现==编译器前端 (clang)](./compile/03/02/README.md)
+- [02 - 实现 编译器 前端(clang)](./compile/03/02/README.md)
 
-- [03 - ==扩展==编译器前端 & 增加==JIT==支持](./compile/03/03/README.md)
+- [03 - 扩展 编译器 前端 & 增加 JIT 支持](./compile/03/03/README.md)
 
-- [04 - IR==优化器==](./compile/03/04/README.md)
+- [04 - IR 优化器](./compile/03/04/README.md)
 
-- [05 - 平台无关的代码生成器](./compile/03/05/README.md)
+- [05 - 与平台无关的 代码生成器](./compile/03/05/README.md)
 
-### 05. LLVM 个人学习记录
+### 05. LLVM 个人学习笔记
 
-#### 01. LLVM
+#### 01. LLVM ==架构==
 
-- [LLVM](./compile/04/05/README.md)
+- [README](./compile/04/05/README.md)
 
-#### 02. clang
+#### 02. clang 编译器 ==前端==
 
-##### 01. 基础使用
+##### 01. clang 基础使用
 
-- [基础使用](./compile/04/03/README.md)
+- [README](./compile/04/03/README.md)
 
-##### 02. plugin
+##### 02. ==plugin==
 
-- [plugin](./compile/04/02/README.md)
+- 针对 **语法树(AST)** 有 **完全** 的 **控制权**
 
-##### 03. Static Analyzer Checker
+- 可作为 **插件** 注入到 **编译流程** 中
 
-- [Static Analyzer Checker](./compile/04/06/README.md)
+- 可以 **影响** build 过程
+
+- 针对 **语法树(AST)** 定义一些: 编码规范检查, 代码风格检查，命名检查 ...
+
+- [README](./compile/04/02/README.md)
+
+##### 03. Static Analyzer ==Checker==
+
+- [README](./compile/04/06/README.md)
 
 ##### 04. LibTooling
 
-- [LibTooling](./compile/04/07/README.md)
+- 针对 **语法树(AST)** 有 **完全** 的 **控制权**
 
-#### 03. IR (Intermediate Representation)
+- 可以作为一个 **单独的命令** 使用 (clang-format main.m)
+
+- 也可以自己实现一个类似 LibTooling 这样的工具, 来实现 **遍历、访问、修改** 语法树 中的任意节点
+
+- 甚至做一个 **代码的转换器** , 比如实现 objc 转换成 swift、js、...
+
+- [README](./compile/04/07/README.md)
+
+#### 03. LLVM IR (Intermediate Representation) 中间指令
 
 ##### 01. IR 语法
 
-- [LLVM IR 语法](./compile/04/04/README.md)
+- [README](./compile/04/04/README.md)
 
-#### 04. 编写 Pass 优化 IR
+#### 04. 编写 ==Pass== 优化(opt) IR
 
 ##### 01. Pass
 
-- [Pass](./compile/04/01/README.md)
+- [README](./compile/04/01/README.md)
 
-##### 02. PassManager
+##### 02. Pass==Manager==
 
-- [PassManager](./compile/04/09/README.md)
+- [README](./compile/04/09/README.md)
 
-#### 05. LLVM 函数库
+#### 05. LLVM ==函数库==
 
-##### 01. libclang 函数库
+##### 01. libclang
 
-- [libclang 函数库](./compile/04/08/README.md)
+- [README](./compile/04/08/README.md)
 
 #### 99. WWDC 2019 whats_new_in_clang_and_llvm
 
-- [whats_new_in_clang_and_llvm](./compile/04/99/README.md)
+- [README](./compile/04/99/README.md)
 
 
 
 ## 03. iOS
 
-### 01. 高性能编程
+### 01. 启动优化
 
 
 
-### 02. 启动优化
-
-
-
-### 03. 组件化
+### 02. 组件化
 
 - [0 - 组件的层次](./ios/02/01/README.md)
 
@@ -189,11 +201,11 @@
 
 - [0 - 提升 组件化 日常开发效率](./ios/02/01/README.md)
 
-### 04. 包体积
+### 03. 包体积分析与优化
 
 - [README](./ios/04/README.md)
 
-### 05. cocoapods 源码阅读
+### 04. cocoapods 源码阅读
 
 - [01 - Gemfile 与 cocoapods.gemspec](./ruby/cocoapods/01/README.md)
 
@@ -203,7 +215,9 @@
 
 
 
-## 04. Ansible
+## 04. devops
+
+### 01. Ansible
 
 最近因为做包体积自动化分析工具，就涉及到 CI/CD 打包环境进行修改，于是顺利的搞出了问题 … 解决的过程中，就一直想有没有什么工具能够减轻恢复环境的痛苦 ..
 

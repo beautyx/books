@@ -43,7 +43,7 @@ MPM.add(createSimplePass(SimplePass));
 
 
 
-## 2. 注册 LLVM Pass 编译路径
+## 2. 注册 Pass 的编译路径
 
 ### 1. 进入 所有 pass 目录
 
@@ -119,3 +119,18 @@ required_libraries = AggressiveInstCombine Analysis BitReader BitWriter Core Ins
 
 required_libraries = ............ LLVMObfuscation
 ```
+
+
+
+## 3. 加载 pass
+
+```
+$LLVM_BUILD_ROOT/Debug/bin/clang \
+	-mllvm \
+	-simplepass \
+	test.c \
+	-o after_test
+```
+
+
+
