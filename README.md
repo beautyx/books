@@ -109,11 +109,11 @@
 
 ### 05. LLVM 个人学习记录
 
-#### 01. LLVM 
+#### 01. LLVM
 
 - [LLVM](./compile/04/05/README.md)
 
-#### 02. clang 
+#### 02. clang
 
 ##### 01. 基础使用
 
@@ -131,15 +131,21 @@
 
 - [LibTooling](./compile/04/07/README.md)
 
-#### 03. IR
+#### 03. IR (Intermediate Representation)
 
-##### 01. 语法
+##### 01. IR 语法
 
 - [LLVM IR 语法](./compile/04/04/README.md)
 
-#### 04. Pass
+#### 04. 编写 Pass 优化 IR
 
-- [LLVM Pass 优化 IR](./compile/04/01/README.md)
+##### 01. Pass
+
+- [Pass](./compile/04/01/README.md)
+
+##### 02. PassManager
+
+- [PassManager](./compile/04/09/README.md)
 
 #### 05. LLVM 函数库
 
