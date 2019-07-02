@@ -2,7 +2,7 @@
 
 
 
-## 1. clang plugin
+## 1. 实现一个简单的 clang plugin
 
 ### 1. clang plugin 作用
 
@@ -19,53 +19,273 @@
 | clang::RecursiveASTVisitor | 前序或后续地深度优先 **搜索 整个 AST**, 并访问 **每一个节点** 的基类 |
 | clang::MatchFinder         | 是一个 AST 节点的查找 **过滤匹配器**, 可以使用 addMatcher 函数 去匹配自己关注的 AST 节点 |
 
-### 3. 编译时 插入自己开发的 clang plugin
-
-#### 1. 直接使用 自己的 clang
+### 3. cd $LLVM_SOURCE_ROOT/tools/clang/tools
 
 ```
-$LLVM_BUILD_ROOT/Debug/bin/clang *** \
-  -Xclang -load -Xclang <plugin.dylib路径> \
-  -Xclang -add-plugin \
-	-Xclang <插件名> \
-  -Xclang <插件参数>
+ ~/llvm/tools/clang/tools   release_70  ll
+total 8
+-rw-r--r--   1 xiongzenghui  staff   1.2K  6 27 00:51 CMakeLists.txt
+drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 arcmt-test
+drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 c-arcmt-test
+drwxr-xr-x   5 xiongzenghui  staff   160B  6 27 00:51 c-index-test
+drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-check
+drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-diff
+drwxr-xr-x  12 xiongzenghui  staff   384B  6 27 00:51 clang-format
+drwxr-xr-x   8 xiongzenghui  staff   256B  6 27 00:51 clang-format-vs
+drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-func-mapping
+drwxr-xr-x  17 xiongzenghui  staff   544B  6 27 00:51 clang-fuzzer
+drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-import-test
+drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-offload-bundler
+drwxr-xr-x   7 xiongzenghui  staff   224B  6 27 00:51 clang-refactor
+drwxr-xr-x   6 xiongzenghui  staff   192B  6 27 00:51 clang-rename
+drwxr-xr-x   3 xiongzenghui  staff    96B  6 27 00:51 diag-build
+drwxr-xr-x  12 xiongzenghui  staff   384B  6 27 00:51 diagtool
+drwxr-xr-x   8 xiongzenghui  staff   256B  6 27 00:51 driver
+drwxr-xr-x  25 xiongzenghui  staff   800B  6 27 00:51 extra
+drwxr-xr-x  37 xiongzenghui  staff   1.2K  6 27 00:51 libclang
+drwxr-xr-x   7 xiongzenghui  staff   224B  6 27 00:51 scan-build
+drwxr-xr-x   7 xiongzenghui  staff   224B  6 27 00:51 scan-build-py
+drwxr-xr-x   5 xiongzenghui  staff   160B  6 27 00:51 scan-view
 ```
 
-其中的 `$LLVM_BUILD_ROOT/Debug/bin/clang` 是我自己通过编译 LLVM/clang 源码生成的.
+- 这下面都是一个个的 **目录**
+- 每一个 **目录** 都是一个 **clang plugin** 的 **源码目录**
 
-#### 2. 从 xcodebuild 日志中获得完整的 编译命令行, 再替换成 自己的 clang
+### 4. 创建 myplugin 开发目录
 
 ```
-clang -std=c++11 -stdlib=libc++ -L/opt/local/lib -
-L/opt/llvm/llvm_build/lib  
--I/opt/llvm/llvm_build/tools/clang/include -
-I/opt/llvm/llvm_build/include -
-I/opt/llvm/llvm/tools/clang/include -I/opt/llvm/llvm/include -
-dynamiclib -Wl,-headerpad_max_install_names -lclang -
-lclangFrontend -lclangAST -lclangAnalysis -lclangBasic -
-lclangCodeGen -lclangDriver -lclangFrontendTool -lclangLex -
-lclangParse -lclangSema -lclangEdit -lclangSerialization -
-lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -
-lclangStaticAnalyzerFrontend -lLLVMX86CodeGen -
-lLLVMX86AsmParser -lLLVMX86Disassembler -lLLVMExecutionEngine 
--lLLVMAsmPrinter -lLLVMSelectionDAG -lLLVMX86AsmPrinter -
-lLLVMX86Info -lLLVMMCParser -lLLVMCodeGen -lLLVMX86Utils -
-lLLVMScalarOpts -lLLVMInstCombine -lLLVMTransformUtils -
-lLLVMAnalysis -lLLVMTarget -lLLVMCore -lLLVMMC -lLLVMSupport -
-lLLVMBitReader -lLLVMOption -lLLVMProfileData -lpthread -
-lcurses -lz -lstdc++ -fPIC -fno-common -Woverloaded-virtual -
-Wcast-qual -fno-strict-aliasing -pedantic -Wno-long-long -Wall 
--Wno-unused-parameter -Wwrite-strings -fno-rtti -fPIC 	
-./printClsPlugin.cpp -o ClangPlugin.dylib
+ ~/llvm/tools/clang/tools/myplugin   release_70 ●  tree
+.
+├── CMakeLists.txt
+└── MyPlugin.cpp
 ```
 
+### 5. myplugin/CMakeLists.txt
+
+```cmake
+add_llvm_loadable_module(MyPlugin
+MyPlugin.cpp
+PLUGIN_TOOL clang
+)
+
+if(LLVM_ENABLE_PLUGINS AND (WIN32 OR CYGWIN))
+  target_link_libraries(MyPlugin PRIVATE
+    clangAST
+    clangBasic
+    clangFrontend
+    clangLex
+    LLVMSupport
+    )
+endif()
+```
+
+### 6. myplugin/MyPlugin.cpp
+
+```c++
+#include "clang/AST/AST.h"
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendPluginRegistry.h"
+
+#include <iostream>
+
+using namespace clang;
+using namespace std;
+using namespace llvm;
+
+namespace MyPlugin {
+  class MyASTVisitor : public RecursiveASTVisitor<MyASTVisitor> {
+  private:
+    ASTContext *context;
+
+  public:
+    void setContext(ASTContext &context) { this->context = &context; }
+
+    bool VisitDecl(Decl *decl) {
+      if (isa<ObjCInterfaceDecl>(decl)) {
+        ObjCInterfaceDecl *interDecl = (ObjCInterfaceDecl *)decl;
+        if (interDecl->getSuperClass()) {
+          string interName = interDecl->getNameAsString();
+          string superClassName = interDecl->getSuperClass()->getNameAsString();
+
+          cout << "-------- ClassName:" << interName
+              << " superClassName:" << superClassName << endl;
+        }
+      }
+
+      return true;
+    }
+  };
+
+  class MyASTConsumer : public ASTConsumer {
+  private:
+    MyASTVisitor visitor;
+    void HandleTranslationUnit(ASTContext &context) {
+      visitor.setContext(context);
+      visitor.TraverseDecl(context.getTranslationUnitDecl());
+    }
+  };
+  
+  class MyASTAction : public PluginASTAction {
+  public:
+    unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &Compiler,
+                                              StringRef InFile) {
+      return unique_ptr<MyASTConsumer>(new MyASTConsumer);
+    }
+    bool ParseArgs(const CompilerInstance &CI,
+                  const std::vector<std::string> &args) {
+      return true;
+    }
+  };
+} // namespace MyPlugin
+
+static clang::FrontendPluginRegistry::Add<MyPlugin::MyASTAction> X("MyPlugin", "MyPlugin desc");
+```
+
+先不管代码实现，先跑起来再说.
+
+### 7. 修改 $LLVM_SOURCE_ROOT/tools/clang/tools/CMakeLists.txt 注册 plugin 源码目录的路径
+
+```makefile
+................
+
+add_clang_subdirectory(myplugin) # 末尾注册自己的【clang plugin 源码】目录名
+```
+
+### 8. 重新生成 LLVM.xcodeproj
+
+#### 1. cmake generate xcodeproj
+
+```
+cd $LLVM_BUILD_ROOT
+cmake ../llvm -G Xcode -DCMAKE_BUILD_TYPE=Debug
+```
+
+#### 2. 如果报错如下
+
+```
+...............
+
+-- Linker detection: ld64
+LLVM STATUS:
+  Definitions -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
+  Includes    /Users/xiongzenghui/llvm/include;/Users/xiongzenghui/llvm_build/include
+              /Users/xiongzenghui/llvm/tools/clang/include;/Users/xiongzenghui/llvm_build/tools/clang/include
+  Libraries   /Users/xiongzenghui/llvm_build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/lib
+CMake Warning (dev) at cmake/modules/AddLLVM.cmake:882 (if):
+  Policy CMP0057 is not set: Support new IN_LIST if() operator.  Run "cmake
+  --help-policy CMP0057" for policy details.  Use the cmake_policy command to
+  set the policy and suppress this warning.
+
+  IN_LIST will be interpreted as an operator when the policy is set to NEW.
+  Since the policy is not set the OLD behavior will be used.
+Call Stack (most recent call first):
+  tools/bugpoint/CMakeLists.txt:24 (add_llvm_tool)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Error at cmake/modules/AddLLVM.cmake:882 (if):
+  if given arguments:
+
+    "bugpoint" "IN_LIST" "LLVM_TOOLCHAIN_TOOLS" "OR" "NOT" "LLVM_INSTALL_TOOLCHAIN_ONLY"
+
+  Unknown arguments specified
+Call Stack (most recent call first):
+  tools/bugpoint/CMakeLists.txt:24 (add_llvm_tool)
 
 
-## 2. 使用 自己的 clang plugin
+-- Configuring incomplete, errors occurred!
+See also "/Users/xiongzenghui/llvm_build/CMakeFiles/CMakeOutput.log".
+See also "/Users/xiongzenghui/llvm_build/CMakeFiles/CMakeError.log".
+```
 
-### 1. ==命令行== 直接使用 plugin
+看样子好像是 **cmake 语法** 有问题.
 
-#### 1. test.m
+#### 3. 发现 clang-plugins-demo/CMakeLists.txt 中使用 ==2.8== 版本的 cmake
+
+![](01.png)
+
+#### 4. 但是我本机中装的是 ==3.13.3== 版本的 cmake
+
+```
+ ~/Desktop  cmake --version
+cmake version 3.13.3
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+```
+
+所以可能是 cmake 版本不对的问题.
+
+#### 5. 修改 clang-plugins-demo/CMakeLists.txt 使用本机的 ==3.13.3== 版本
+
+![](02.png)
+
+#### 6. 再次重新 generate xcodeproj
+
+```
+cmake ../llvm -G Xcode -DCMAKE_BUILD_TYPE=Debug
+```
+
+ok.
+
+### 9. 重新构建 clang
+
+![](03.png)
+
+### 10. 构建 自己的 clang plugin
+
+![](10.png)
+
+```
+ ~/llvm_build/Debug/lib  ll | grep -i same
+-rwxr-xr-x  1 xiongzenghui  staff   1.2M  6 28 20:16 SameTypePlugin.dylib
+```
+
+#### 1. ~~clang-plugins-demo、及其子目录下, 并没有发现 `add_llvm_loadable_module()` cmake 函数使用~~
+
+通常是这样的
+
+![](05.png)
+
+比如之前的 demo llvm pass 下的 CMakeLists.txt 指定在 xcode 中的 target
+
+```cmake
+add_llvm_loadable_module( LLVMObfuscation
+  SimplePass.cpp
+
+  DEPENDS
+  intrinsics_gen
+  PLUGIN_TOOL
+  opt
+)
+```
+
+![](06.png)
+
+#### 2. ~~但是发现却有 `add_executable()` cmake 函数使用~~
+
+![](07.png)
+
+----------
+
+![](08.png)
+
+#### 3. ~~xcode 存在对应的 target~~
+
+![](09.png)
+
+依次选择 scheme 进行构建
+
+### 11. libclang.dylib
+
+![](11.png)
+
+
+
+
+## 2. 命令行 -- 运行 clang plugin
+
+### 1. test.m
 
 ```objective-c
 // ocClsDemo.m
@@ -82,7 +302,19 @@ Wcast-qual -fno-strict-aliasing -pedantic -Wno-long-long -Wall
 @end
 ```
 
-#### 2. clang 加载 plugin dylib
+### 2. 直接使用 自己的 clang
+
+```
+$LLVM_BUILD_ROOT/Debug/bin/clang *** \
+  -Xclang -load -Xclang <plugin.dylib路径> \
+  -Xclang -add-plugin \
+	-Xclang <插件名> \
+  -Xclang <插件参数>
+```
+
+其中的 `$LLVM_BUILD_ROOT/Debug/bin/clang` 是我自己通过编译 LLVM/clang 源码生成的.
+
+### 3. 执行 clang 时, 加载 自己的 plugin dylib
 
 ```
 $LLVM_BUILD_ROOT/Debug/bin/clang \
@@ -107,7 +339,7 @@ $LLVM_BUILD_ROOT/Debug/bin/clang \
   - 1) `-Xclang -load -Xclang ./MyPlugin.dylib` 加载【clang 插件】的 **dylib**
   - 2) `-Xclang -add-plugin -Xclang MyPlugin` 加载【clang 插件】的 **可执行文件 MyPlugin**
 
-#### 3. 输出如下
+### 4. 输出如下
 
 ```
 -------- ClassName:NSArray superClassName:NSObject
@@ -139,17 +371,84 @@ $LLVM_BUILD_ROOT/Debug/bin/clang \
 -------- ClassName:ViewController superClassName:UIViewController
 ```
 
-#### 4. 或者将 xcodebuild 输出命令行中的 clang 路径替换掉即可
+### 5. 或者将 xcodebuild 输出命令行中的 clang 路径替换掉即可
 
 直接替换 **红框的 clang** 为自己编译的 clang 即可.
 
+从 xcodebuild 日志中获得完整的 编译命令行, 再替换成 自己的 clang
+
+```
+clang -std=c++11 -stdlib=libc++ -L/opt/local/lib -
+L/opt/llvm/llvm_build/lib  
+-I/opt/llvm/llvm_build/tools/clang/include -
+I/opt/llvm/llvm_build/include -
+I/opt/llvm/llvm/tools/clang/include -I/opt/llvm/llvm/include -
+dynamiclib -Wl,-headerpad_max_install_names -lclang -
+lclangFrontend -lclangAST -lclangAnalysis -lclangBasic -
+lclangCodeGen -lclangDriver -lclangFrontendTool -lclangLex -
+lclangParse -lclangSema -lclangEdit -lclangSerialization -
+lclangStaticAnalyzerCheckers -lclangStaticAnalyzerCore -
+lclangStaticAnalyzerFrontend -lLLVMX86CodeGen -
+lLLVMX86AsmParser -lLLVMX86Disassembler -lLLVMExecutionEngine 
+-lLLVMAsmPrinter -lLLVMSelectionDAG -lLLVMX86AsmPrinter -
+lLLVMX86Info -lLLVMMCParser -lLLVMCodeGen -lLLVMX86Utils -
+lLLVMScalarOpts -lLLVMInstCombine -lLLVMTransformUtils -
+lLLVMAnalysis -lLLVMTarget -lLLVMCore -lLLVMMC -lLLVMSupport -
+lLLVMBitReader -lLLVMOption -lLLVMProfileData -lpthread -
+lcurses -lz -lstdc++ -fPIC -fno-common -Woverloaded-virtual -
+Wcast-qual -fno-strict-aliasing -pedantic -Wno-long-long -Wall 
+-Wno-unused-parameter -Wwrite-strings -fno-rtti -fPIC 	
+./printClsPlugin.cpp -o ClangPlugin.dylib
+```
+
 ![](13.png)
 
-### 2. ==xcode== 集成 plugin
-
-#### 1. 
 
 
+
+## 3.1 xcode -- 运行 clang plugin : build settings
+
+### 1. Xcode -> target -> Build Settings -> OTHER_CFLAGS
+
+添加加载 clang plugin dylib 参数
+
+```
+-Xclang -load -Xclang (.dylib)动态库路径 -Xclang -add-plugin -Xclang 插件名字（namespace 的名字，名字不对则无法使用插件）
+```
+
+比如我加载我自己编译的 demo plugin
+
+```
+-Xclang -load -Xclang /Users/xiongzenghui/llvm_build/Debug/lib/MyPlugin.dylib -Xclang -add-plugin -Xclang MyPlugin
+```
+
+![](16.png)
+
+### 2. Build Settings 中新增 CC、CXX 两项用户定义的设置
+
+![](17.png)
+
+![](18.png)
+
+### 3. 如果编译报错: unknown argument index ...
+
+![](19.png)
+
+### 4. Build Settings 栏目中搜索 index，将 Enable Index-Wihle-Building Functionality的Default 改为 NO
+
+![](20.png)
+
+编译通过.
+
+### 5. 查看 xcode 构建输出
+
+![](21.png)
+
+![](22.png)
+
+
+
+## 3.2 ~~xcode -- 运行 clang plugin : XcodeHacking~~
 
 ### 1. 下载 XcodeHacking
 
@@ -237,275 +536,6 @@ sudo mv HackedBuildSystem.xcspec `xcode-select -print-path`/Platforms/iPhoneSimu
 - 4、展开后就能看到自定义clang插件的输出
 
 ![](698554-de614d7d87c219d6.png)
-
-
-
-## 4. 实现一个简单的 clang plugin
-
-### 1. cd $LLVM_SOURCE_ROOT/tools/clang/tools
-
-```
- ~/llvm/tools/clang/tools   release_70  ll
-total 8
--rw-r--r--   1 xiongzenghui  staff   1.2K  6 27 00:51 CMakeLists.txt
-drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 arcmt-test
-drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 c-arcmt-test
-drwxr-xr-x   5 xiongzenghui  staff   160B  6 27 00:51 c-index-test
-drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-check
-drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-diff
-drwxr-xr-x  12 xiongzenghui  staff   384B  6 27 00:51 clang-format
-drwxr-xr-x   8 xiongzenghui  staff   256B  6 27 00:51 clang-format-vs
-drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-func-mapping
-drwxr-xr-x  17 xiongzenghui  staff   544B  6 27 00:51 clang-fuzzer
-drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-import-test
-drwxr-xr-x   4 xiongzenghui  staff   128B  6 27 00:51 clang-offload-bundler
-drwxr-xr-x   7 xiongzenghui  staff   224B  6 27 00:51 clang-refactor
-drwxr-xr-x   6 xiongzenghui  staff   192B  6 27 00:51 clang-rename
-drwxr-xr-x   3 xiongzenghui  staff    96B  6 27 00:51 diag-build
-drwxr-xr-x  12 xiongzenghui  staff   384B  6 27 00:51 diagtool
-drwxr-xr-x   8 xiongzenghui  staff   256B  6 27 00:51 driver
-drwxr-xr-x  25 xiongzenghui  staff   800B  6 27 00:51 extra
-drwxr-xr-x  37 xiongzenghui  staff   1.2K  6 27 00:51 libclang
-drwxr-xr-x   7 xiongzenghui  staff   224B  6 27 00:51 scan-build
-drwxr-xr-x   7 xiongzenghui  staff   224B  6 27 00:51 scan-build-py
-drwxr-xr-x   5 xiongzenghui  staff   160B  6 27 00:51 scan-view
-```
-
-- 这下面都是一个个的 **目录**
-- 每一个 **目录** 都是一个 **clang plugin** 的 **源码目录**
-
-### 2. 创建 myplugin 开发目录
-
-```
- ~/llvm/tools/clang/tools/myplugin   release_70 ●  tree
-.
-├── CMakeLists.txt
-└── MyPlugin.cpp
-```
-
-### 3. myplugin/CMakeLists.txt
-
-```cmake
-add_llvm_loadable_module(MyPlugin
-MyPlugin.cpp
-PLUGIN_TOOL clang
-)
-
-if(LLVM_ENABLE_PLUGINS AND (WIN32 OR CYGWIN))
-  target_link_libraries(MyPlugin PRIVATE
-    clangAST
-    clangBasic
-    clangFrontend
-    clangLex
-    LLVMSupport
-    )
-endif()
-```
-
-### 4. myplugin/MyPlugin.cpp
-
-```c++
-#include "clang/AST/AST.h"
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/FrontendPluginRegistry.h"
-
-#include <iostream>
-
-using namespace clang;
-using namespace std;
-using namespace llvm;
-
-namespace MyPlugin {
-  class MyASTVisitor : public RecursiveASTVisitor<MyASTVisitor> {
-  private:
-    ASTContext *context;
-
-  public:
-    void setContext(ASTContext &context) { this->context = &context; }
-
-    bool VisitDecl(Decl *decl) {
-      if (isa<ObjCInterfaceDecl>(decl)) {
-        ObjCInterfaceDecl *interDecl = (ObjCInterfaceDecl *)decl;
-        if (interDecl->getSuperClass()) {
-          string interName = interDecl->getNameAsString();
-          string superClassName = interDecl->getSuperClass()->getNameAsString();
-
-          cout << "-------- ClassName:" << interName
-              << " superClassName:" << superClassName << endl;
-        }
-      }
-
-      return true;
-    }
-  };
-
-  class MyASTConsumer : public ASTConsumer {
-  private:
-    MyASTVisitor visitor;
-    void HandleTranslationUnit(ASTContext &context) {
-      visitor.setContext(context);
-      visitor.TraverseDecl(context.getTranslationUnitDecl());
-    }
-  };
-  
-  class MyASTAction : public PluginASTAction {
-  public:
-    unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &Compiler,
-                                              StringRef InFile) {
-      return unique_ptr<MyASTConsumer>(new MyASTConsumer);
-    }
-    bool ParseArgs(const CompilerInstance &CI,
-                  const std::vector<std::string> &args) {
-      return true;
-    }
-  };
-} // namespace MyPlugin
-
-static clang::FrontendPluginRegistry::Add<MyPlugin::MyASTAction> X("MyPlugin", "MyPlugin desc");
-```
-
-先不管代码实现，先跑起来再说.
-
-### 5. 修改 $LLVM_SOURCE_ROOT/tools/clang/tools/CMakeLists.txt 注册 plugin 源码目录的路径
-
-```makefile
-................
-
-add_clang_subdirectory(myplugin) # 末尾注册自己的【clang plugin 源码】目录名
-```
-
-### 6. 重新生成 LLVM.xcodeproj
-
-#### 1. cmake generate xcodeproj
-
-```
-cd $LLVM_BUILD_ROOT
-cmake ../llvm -G Xcode -DCMAKE_BUILD_TYPE=Debug
-```
-
-#### 2. 如果报错如下
-
-```
-...............
-
--- Linker detection: ld64
-LLVM STATUS:
-  Definitions -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  Includes    /Users/xiongzenghui/llvm/include;/Users/xiongzenghui/llvm_build/include
-              /Users/xiongzenghui/llvm/tools/clang/include;/Users/xiongzenghui/llvm_build/tools/clang/include
-  Libraries   /Users/xiongzenghui/llvm_build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/lib
-CMake Warning (dev) at cmake/modules/AddLLVM.cmake:882 (if):
-  Policy CMP0057 is not set: Support new IN_LIST if() operator.  Run "cmake
-  --help-policy CMP0057" for policy details.  Use the cmake_policy command to
-  set the policy and suppress this warning.
-
-  IN_LIST will be interpreted as an operator when the policy is set to NEW.
-  Since the policy is not set the OLD behavior will be used.
-Call Stack (most recent call first):
-  tools/bugpoint/CMakeLists.txt:24 (add_llvm_tool)
-This warning is for project developers.  Use -Wno-dev to suppress it.
-
-CMake Error at cmake/modules/AddLLVM.cmake:882 (if):
-  if given arguments:
-
-    "bugpoint" "IN_LIST" "LLVM_TOOLCHAIN_TOOLS" "OR" "NOT" "LLVM_INSTALL_TOOLCHAIN_ONLY"
-
-  Unknown arguments specified
-Call Stack (most recent call first):
-  tools/bugpoint/CMakeLists.txt:24 (add_llvm_tool)
-
-
--- Configuring incomplete, errors occurred!
-See also "/Users/xiongzenghui/llvm_build/CMakeFiles/CMakeOutput.log".
-See also "/Users/xiongzenghui/llvm_build/CMakeFiles/CMakeError.log".
-```
-
-看样子好像是 **cmake 语法** 有问题.
-
-#### 3. 发现 clang-plugins-demo/CMakeLists.txt 中使用 ==2.8== 版本的 cmake
-
-![](01.png)
-
-#### 4. 但是我本机中装的是 ==3.13.3== 版本的 cmake
-
-```
- ~/Desktop  cmake --version
-cmake version 3.13.3
-
-CMake suite maintained and supported by Kitware (kitware.com/cmake).
-```
-
-所以可能是 cmake 版本不对的问题.
-
-#### 5. 修改 clang-plugins-demo/CMakeLists.txt 使用本机的 ==3.13.3== 版本
-
-![](02.png)
-
-#### 6. 再次重新 generate xcodeproj
-
-```
-cmake ../llvm -G Xcode -DCMAKE_BUILD_TYPE=Debug
-```
-
-ok.
-
-### 7. 重新构建 clang
-
-![](03.png)
-
-### 8. 构建 自己的 clang plugin
-
-![](10.png)
-
-```
- ~/llvm_build/Debug/lib  ll | grep -i same
--rwxr-xr-x  1 xiongzenghui  staff   1.2M  6 28 20:16 SameTypePlugin.dylib
-```
-
-#### 1. ~~clang-plugins-demo、及其子目录下, 并没有发现 `add_llvm_loadable_module()` cmake 函数使用~~
-
-通常是这样的
-
-![](05.png)
-
-比如之前的 demo llvm pass 下的 CMakeLists.txt 指定在 xcode 中的 target
-
-```cmake
-add_llvm_loadable_module( LLVMObfuscation
-  SimplePass.cpp
-
-  DEPENDS
-  intrinsics_gen
-  PLUGIN_TOOL
-  opt
-)
-```
-
-![](06.png)
-
-#### 2. ~~但是发现却有 `add_executable()` cmake 函数使用~~
-
-![](07.png)
-
-----------
-
-![](08.png)
-
-#### 3. ~~xcode 存在对应的 target~~
-
-![](09.png)
-
-依次选择 scheme 进行构建
-
-### 9. libclang.dylib
-
-![](11.png)
-
-
-
-
 
 
 
