@@ -91,7 +91,7 @@
 
 - [05 - 重用(库)](./compile/02/05/README.md)
 
-### 03. 使用 linux 汇编语言
+### 03. 使用linux汇编语言
 
 
 
@@ -135,18 +135,6 @@
 
 - [README](./compile/04/06/README.md)
 
-##### 04. LibTooling
-
-- 针对 **语法树(AST)** 有 **完全** 的 **控制权**
-
-- 可以作为一个 **单独的命令** 使用 (clang-format main.m)
-
-- 也可以自己实现一个类似 LibTooling 这样的工具, 来实现 **遍历、访问、修改** 语法树 中的任意节点
-
-- 甚至做一个 **代码的转换器** , 比如实现 objc 转换成 swift、js、...
-
-- [README](./compile/04/07/README.md)
-
 #### 03. LLVM IR (Intermediate Representation) 中间指令
 
 ##### 01. IR 语法
@@ -169,13 +157,64 @@
 
 - [README](./compile/04/08/README.md)
 
+##### 02. LibTooling
+
+- 通过这个库我们很容易搭建我们 **编译器** 的 **前端工具**
+
+- 作用与上面的 **libclang 大致相似**
+  - **libclang** 这个 **库** 比较 **稳定** , 基本不怎么更新
+  - 而 **libTooling 和 clang** 是 **经常更新** , 可能在旧版本能跑的程序在新版本就不能跑了
+
+- LibTooling **优点** 就是提供给使用者的 **AST 解析 和 控制** 能力远比 **libclang** 强大
+
+- 可通过 LibTooling 来实现 **遍历、访问、修改** 语法树 中的任意节点
+
+- 甚至做一个 **代码的转换器** , 比如实现 objc 转换成 swift、js、...
+
+- [README](./compile/04/07/README.md)
+
 #### 99. WWDC 2019 whats_new_in_clang_and_llvm
 
 - [README](./compile/04/99/README.md)
 
+### 06. CMake
+
+- 介于学习 LLVM 过程中或多或少接触到 cmake/make 这样的构建工具
+
+- 所以还是有必要花一点时间来学习一下他的基本使用
+
+- **GNU make** 我就不记录了
+  - 因为很少直接使用 Makefile 来编写规则, 大多只有一些较简单且目标平台单一的代码库才会使用
+  - 比如一些 Linux 下的开源库, 大多都是直接使用 Makefile 来编写构建规则
+  - 大概就是一些: target、内置函数、变量、流程控制、条件编译 ... 有兴趣可以自己取学习下
+  - 这里就不记录了, 因为 LLVM 源码中基本都是使用 CMake 生成 **跨平台** 构建脚本
 
 
-## 03. iOS
+- CMake **跨平台** 比较好, 且提供了很多 **内置的函数**
+
+-------------
+
+- [01- Hello World](./cmake/01/README.md)
+
+- [02 - 变量](./cmake/02/README.md)
+
+- [03 - 内置指令、执行 shell 命令](./cmake/03/README.md)
+
+- [04 - if/else/for](./cmake/04/README.md)
+
+- [05 - 宏定义 vs 函数](./cmake/05/README.md)
+
+- [06 - 内部构建 vs 外部构建](./cmake/06/README.md)
+
+- [07 - 条件编译](./cmake/07/README.md)
+
+- [08 - 其他的 内置命令](./cmake/08/README.md)
+
+- [09 - 构建 可执行/二进制库](./cmake/09/README.md)
+
+
+
+## 03. iOS 
 
 ### 01. 启动优化
 
@@ -215,40 +254,50 @@
 
 
 
-## 04. devops
+## 04. iOS CI 构建环境
 
-### 01. Ansible
+### 01. Ansible ==批量== 部署 iOS 构建环境
 
 最近因为做包体积自动化分析工具，就涉及到 CI/CD 打包环境进行修改，于是顺利的搞出了问题 … 解决的过程中，就一直想有没有什么工具能够减轻恢复环境的痛苦 ..
 
 于是找到了 ansible !
 
-[01 - ansible start](./ansible/01/ansible_start.md)
+- [01 - ansible start](./ansible/01/ansible_start.md)
 
-[02 - inventory](./ansible/02/ansible_inventory.md)
+- [02 - inventory](./ansible/02/ansible_inventory.md)
 
-[03 - modules - 01 - 学会使用 ansible 模块](./ansible/03/01/ansible_modules.md)
+- [03 - modules - 01 - 学会使用 ansible 模块](./ansible/03/01/ansible_modules.md)
 
-[03 - modules - 02 - 常用模块](./ansible/03/02/ansible_modules.md)
+- [03 - modules - 02 - 常用模块](./ansible/03/02/ansible_modules.md)
 
-[04 - playbook - 01 - playbook 是什么？](./ansible/04/01/ansible_playbook.md)
+- [04 - playbook - 01 - playbook 是什么？](./ansible/04/01/ansible_playbook.md)
 
-[04 - playbook - 02 - tasks](./ansible/04/02/ansible_playbook.md)
+- [04 - playbook - 02 - tasks](./ansible/04/02/ansible_playbook.md)
 
-[04 - playbook - 03 - handlers](./ansible/04/03/ansible_playbook.md)
+- [04 - playbook - 03 - handlers](./ansible/04/03/ansible_playbook.md)
 
-[04 - playbook - 04 - tags](./ansible/04/04/ansible_playbook.md)
+- [04 - playbook - 04 - tags](./ansible/04/04/ansible_playbook.md)
 
-[04 - playbook - 05 - 变量](./ansible/04/05/ansible_playbook.md)
+- [04 - playbook - 05 - 变量](./ansible/04/05/ansible_playbook.md)
 
-[05 - playbook - 01 - 循环](./ansible/05/01/ansible_playbook.md)
+- [05 - playbook - 01 - 循环](./ansible/05/01/ansible_playbook.md)
 
-[05 - playbook - 02 - 判断 - when](./ansible/05/02/ansible_playbook.md)
+- [05 - playbook - 02 - 判断 - when](./ansible/05/02/ansible_playbook.md)
 
-[05 - playbook - 03 - 判断 - test](./ansible/05/03/ansible_playbook.md)
+- [05 - playbook - 03 - 判断 - test](./ansible/05/03/ansible_playbook.md)
 
-[06 - playbook - 01 - 过滤器](./ansible/06/ansible_playbook.md)
+- [06 - playbook - 01 - 过滤器](./ansible/06/ansible_playbook.md)
 
-[07 - playbook - 01 - 角色](./ansible/07/ansible_playbook.md)
+- [07 - playbook - 01 - 角色](./ansible/07/ansible_playbook.md)
 
+### 02. ==jenkins== job ==环境== 与 ==shell 代码== 统一管理
+
+- [README](./ios_ci/01/README.md)
+
+### 03. ==dSYM== 文件管理
+
+- dSYM 保存 **0x12...09023 内存地址** 与 **源码(文件名、哪一行、类名、方法名..)** 映射关系
+- 并且可以从 dSYM 导出一份 **symbols 符号** 表文件
+
+- [README](./ios_ci/02/README.md)
 
