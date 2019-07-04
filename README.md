@@ -51,7 +51,7 @@
 
 
 
-## 02. compiler
+## 02. Compiler
 
 ### 01. 程序员的自我修养
 
@@ -153,11 +153,11 @@
 
 #### 05. LLVM ==函数库==
 
-##### 01. libclang
+##### 01. libclang ()
 
 - [README](./compile/04/08/README.md)
 
-##### 02. LibTooling
+##### 02. LibTooling (clang::tooling)
 
 - 通过这个库我们很容易搭建我们 **编译器** 的 **前端工具**
 
@@ -296,8 +296,12 @@
 
 ### 02. ==jenkins== job 代码 统一管理
 
-- 多个 jenkins job 环境不一致、重复的 shell 代码无法复用
+- jenkins job 个数太多 存在的问题
+  - **环境** 不一致
+  - **重复** shell **代码**
+
 - fastlane 模式统一管理 jenkins job 代码
+
 - 能够快速拼接处 新的 jenkins job 代码
 
 - [README](./ios_ci/02/README.md)
