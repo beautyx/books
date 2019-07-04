@@ -290,14 +290,22 @@
 
 - [07 - playbook - 01 - 角色](./ansible/07/ansible_playbook.md)
 
-### 02. ==jenkins== job ==环境== 与 ==shell 代码== 统一管理
+### 01. ruby 管理
 
 - [README](./ios_ci/01/README.md)
+
+### 02. ==jenkins== job 代码 统一管理
+
+- 多个 jenkins job 环境不一致、重复的 shell 代码无法复用
+- fastlane 模式统一管理 jenkins job 代码
+- 能够快速拼接处 新的 jenkins job 代码
+
+- [README](./ios_ci/02/README.md)
 
 ### 03. ==dSYM== 文件管理
 
 - dSYM 保存 **0x12...09023 内存地址** 与 **源码(文件名、哪一行、类名、方法名..)** 映射关系
 - 并且可以从 dSYM 导出一份 **symbols 符号** 表文件
 
-- [README](./ios_ci/02/README.md)
+- [README](./ios_ci/03/README.md)
 
