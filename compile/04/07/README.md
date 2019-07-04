@@ -188,7 +188,7 @@ $LLVM_BUILD_ROOT/Debug/bin/mytool test.cpp --
 - 假设您只想 检查 **二元运算符**
 - 有一个 **匹配器** 可以精确地执行该操作，很方便地命名为 **BinaryOperator**
 
-### 2. AST matchers to match all the different nodes in the AST
+### 2. AST matchers to ==match== all the different ==nodes== in the ==AST==
 
 ```c
 binaryOperator(
@@ -215,7 +215,7 @@ ForStmt()
 
 得到一个表示 **for 循环** 的操作.
 
-### 4. a single variable is declared in the first portion of the loop
+### 4. a ==single variable== is declared in the ==first portion== of the loop
 
 ```c
 forStmt(              // for
@@ -229,20 +229,158 @@ forStmt(              // for
 )
 ```
 
-### 5. add condition variable is initialized to zero
+### 5. add condition variable is ==initialized to zero==
 
 ```c
-forStmt(              // for
-  hasLoopInit(        // first portion of the loop
-    declStmt(         // declared statement
-      hasSingleDecl(  // a single variable
-        varDecl()     // var deaclare
+forStmt(                      // for
+  hasLoopInit(                // first portion of the loop
+    declStmt(                 // declared statement
+      hasSingleDecl(          // a single variable
+        varDecl(              // var deaclare
+          hasInitializer(     // initializer
+            integerLiteral(   // int
+              equals(0)       // 0
+            )
+          )
+        )
       )
     )
   )
 )
-
-forStmt(
-  hasLoopInit(declStmt(hasSingleDecl(varDecl(
-  hasInitializer(integerLiteral(equals(0))))))))
 ```
+
+- 1) match loops whose init portion **declares a single variable** which is **initialized** to the **integer literal 0**
+
+- 2) will **not match** loops 
+  - 1) variables are initialized to `'\0'`, `0.0`, `NULL`
+  - 2) any form of zero **besides** the **integer 0**
+
+
+### 6. giving the matcher ==a name== and ==binding== the ForStmt
+
+```c
+forStmt(                      // for
+  hasLoopInit(                // first portion of the loop
+    declStmt(                 // declared statement
+      hasSingleDecl(          // a single variable
+        varDecl(              // var deaclare
+          hasInitializer(     // initializer
+            integerLiteral(   // int
+              equals(0)       // 0
+            )
+          )
+        )
+      )
+    )
+  )
+).bind("forLoop")
+```
+
+### 7. 具体实例
+
+#### 1. tool 目录结构
+
+```
+cd $LLVM_SOURCE_ROOT/tools/clang/tools/extra
+cd LoopConvert
+```
+
+```
+ ~/llvm/tools/clang/tools/extra/LoopConvert   release_70 ●  tree
+.
+├── CMakeLists.txt
+└── LoopConvert.cpp
+
+0 directories, 2 files
+```
+
+#### 2. LoopConvert/LoopConvert.cpp
+
+```c++
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+
+using namespace clang;
+using namespace clang::ast_matchers;
+
+// 1、全局 matcher 对象
+StatementMatcher LoopMatcher = forStmt(
+  hasLoopInit(
+    declStmt(
+      hasSingleDecl(
+        varDecl(
+          hasInitializer(
+            integerLiteral(
+              equals(0)
+            )
+          )
+        )
+      )
+    )
+  )
+).bind("forLoop");
+
+// 2、 matcher's 【callback】
+class LoopPrinter : public MatchFinder::MatchCallback 
+{
+public:
+  virtual void run(const MatchFinder::MatchResult &Result)
+  {
+    if (const ForStmt *FS = Result.Nodes.getNodeAs<clang::ForStmt>("forLoop"))
+      FS->dump();
+  }
+};
+
+// 3、可执行文件
+int main(int argc, const char **argv)
+{
+  // 1.
+  CommonOptionsParser OptionsParser(argc, argv, MyToolCategory);
+
+  // 2.
+  ClangTool Tool(
+    OptionsParser.getCompilations(),
+    OptionsParser.getSourcePathList()
+  );
+
+  // 3. matcher callback
+  LoopPrinter Printer;
+
+  // 4. matcher
+  MatchFinder Finder;
+
+  // 5. matcher add callback
+  Finder.addMatcher(LoopMatcher, &Printer);
+
+  // 6. run tool 
+  return Tool.run(newFrontendActionFactory(&Finder).get());
+}
+```
+
+#### 3. LoopConvert/CMakeLists.txt
+
+```cmake
+set(LLVM_LINK_COMPONENTS support)
+
+add_clang_executable( LoopConvert
+  LoopConvert.cpp
+)
+
+target_link_libraries( LoopConvert
+  PRIVATE
+  clangTooling
+  clangBasic
+  clangASTMatchers
+)
+```
+
+#### 4. 构建生成 可执行文件 测试
+
+```
+bin/loop-convert ~/test-files/simple-loops.cc
+```
+
+
+
+## 5. More Complicated Matchers
+

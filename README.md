@@ -169,7 +169,7 @@
 
 - 可通过 LibTooling 来实现 **遍历、访问、修改** 语法树 中的任意节点
 
-- 甚至做一个 **代码的转换器** , 比如实现 objc 转换成 swift、js、...
+- 甚至做一个 **代码的转换器** (比如实现 objc 转换成 swift、js、...)
 
 - [README](./compile/04/07/README.md)
 
